@@ -2,7 +2,10 @@ package com.ecommerce.application.controller;
 
 import com.ecommerce.application.model.Category;
 import com.ecommerce.application.service.CategoryService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -26,7 +29,14 @@ public class CategoryController {
     }
 
     @DeleteMapping("/api/admin/categories/{categoryId}")
-    public String deleteCategory(@PathVariable long categoryId) {
-        return categoryService.deleteCategory(categoryId);
+    public ResponseEntity<String> deleteCategory(@PathVariable long categoryId) {
+        String status = null;
+        try{
+            status = categoryService.deleteCategory(categoryId);
+            return new ResponseEntity<>(status, HttpStatus.OK);
+        }
+        catch(ResponseStatusException e) {
+            return new ResponseEntity<String>(e.getReason(), e.getStatusCode());
+        }
     }
 }
