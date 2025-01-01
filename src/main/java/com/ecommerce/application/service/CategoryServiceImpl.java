@@ -9,7 +9,6 @@ import com.ecommerce.application.repositories.CategoryRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService{
@@ -36,13 +35,14 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public String createCategory(Category category) {
-        Category savedCategory = categoryRepository.findByCategoryName(category.getCategoryName());
-        if (savedCategory != null) {
+    public CategoryDTO createCategory(CategoryDTO categoryDTO) {
+        Category category = modelMapper.map(categoryDTO, Category.class);
+        category.setCategoryId(null);
+        if (categoryRepository.findByCategoryName(category.getCategoryName()) != null) {
             throw new APIException("Category with the name " + category.getCategoryName() + " already exists !!");
         }
-        categoryRepository.save(category);
-        return "Category " + category.getCategoryName() + " created successfully !!";
+        Category savedCategory = categoryRepository.save(category);
+        return modelMapper.map(savedCategory, CategoryDTO.class);
     }
 
     @Override
