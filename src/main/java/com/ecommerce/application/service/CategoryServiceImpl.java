@@ -41,8 +41,7 @@ public class CategoryServiceImpl implements CategoryService{
         if (categoryRepository.findByCategoryName(category.getCategoryName()) != null) {
             throw new APIException("Category with the name " + category.getCategoryName() + " already exists !!");
         }
-        Category savedCategory = categoryRepository.save(category);
-        return modelMapper.map(savedCategory, CategoryDTO.class);
+        return modelMapper.map(categoryRepository.save(category), CategoryDTO.class);
     }
 
     @Override
@@ -55,7 +54,8 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public String updateCategory(long categoryId, Category category) {
+    public CategoryDTO updateCategory(long categoryId, CategoryDTO categoryDTO) {
+        Category category = modelMapper.map(categoryDTO, Category.class);
         categoryRepository
                 .findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
@@ -63,7 +63,6 @@ public class CategoryServiceImpl implements CategoryService{
         if(categoryRepository.findByCategoryName(category.getCategoryName()) != null) {
             throw new APIException("Category with the name " + category.getCategoryName() + " already exists !!");
         }
-        categoryRepository.save(category);
-        return "Category with id " + categoryId + " updated successfully !!";
+        return modelMapper.map(categoryRepository.save(category), CategoryDTO.class);
     }
 }
