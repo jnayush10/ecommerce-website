@@ -13,7 +13,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> LocalMethodArgumentNotValidException(MethodArgumentNotValidException e){
+    public ResponseEntity<Map<String, String>> localMethodArgumentNotValidException(MethodArgumentNotValidException e){
         Map<String, String> response = new HashMap<>();
         e.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError)error).getField();
@@ -23,8 +23,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> LocalResourceNotFoundException(ResourceNotFoundException e){
+    public ResponseEntity<String> localResourceNotFoundException(ResourceNotFoundException e){
         String errorMessage = e.getMessage();
         return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(APIException.class)
+    public ResponseEntity<String> localAPIException(APIException e){
+        String errorMessage = e.getMessage();
+        return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     }
 }
