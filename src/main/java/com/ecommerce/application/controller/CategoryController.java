@@ -21,10 +21,12 @@ public class CategoryController {
     @GetMapping("/public/categories")
     public ResponseEntity<CategoryResponse> getCategories(
             @RequestParam(name="pageNumber", defaultValue=AppConstants.PAGE_NUMBER, required=false) int pageNumber,
-            @RequestParam(name="pageSize", defaultValue=AppConstants.PAGE_SIZE, required=false) int pageSize)
+            @RequestParam(name="pageSize", defaultValue=AppConstants.PAGE_SIZE, required=false) int pageSize,
+            @RequestParam(name="sortBy", defaultValue=AppConstants.SORT_CATEGORIES_BY, required=false) String sortBy,
+            @RequestParam(name="sortOrder", defaultValue=AppConstants.SORT_DIRECTION, required=false) String sortOrder)
             throws Exception
     {
-        return new ResponseEntity<>(categoryService.getAllCategories(pageNumber, pageSize), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.getAllCategories(pageNumber, pageSize, sortBy, sortOrder), HttpStatus.OK);
     }
 
     @PostMapping("/admin/categories")
