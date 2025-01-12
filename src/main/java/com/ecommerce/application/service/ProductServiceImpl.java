@@ -41,6 +41,10 @@ public class ProductServiceImpl implements ProductService {
         return productResponse;
     }
 
+    private double calculateSpecialPrice(double price, double discount) {
+        return price - (price * (discount * 0.01));
+    }
+
     @Override
     public ProductResponse getAllProducts() {
         List<Product> products = productRepository.findAll();
@@ -66,9 +70,28 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
 
+        if(productRepository.findByProductName(product.getProductName()) != null){
+            throw new APIException("Product with the name " + product.getProductName() + " already exists !!");
+        }
+
         product.setImage("default.png");
         product.setCategory(category);
-        product.setSpecialPrice(product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice()));
+        product.setSpecialPrice(calculateSpecialPrice(product.getPrice(), product.getDiscount()));
         return modelMapper.map(productRepository.save(product), ProductDTO.class);
+    }
+
+    @Override
+    public ProductDTO updateProduct(long productId, Product product) {
+        Product productFromDB = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+
+        productFromDB.setProductName(product.getProductName());
+        productFromDB.setProductDescription(product.getProductDescription());
+        productFromDB.setQuantity(product.getQuantity());
+        productFromDB.setPrice(product.getPrice());
+        productFromDB.setDiscount(product.getDiscount());
+        productFromDB.setSpecialPrice(calculateSpecialPrice(product.getPrice(), product.getDiscount()));
+
+        return modelMapper.map(productRepository.save(productFromDB), ProductDTO.class);
     }
 }

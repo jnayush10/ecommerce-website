@@ -1,10 +1,10 @@
 package com.ecommerce.application.exceptions;
 
-public class APIException extends RuntimeException{
-    private static final long serialVersionUID = 1L;
+import java.io.Serial;
 
-    public APIException() {
-    }
+public class APIException extends RuntimeException{
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public APIException(String message) {
         super(message);
