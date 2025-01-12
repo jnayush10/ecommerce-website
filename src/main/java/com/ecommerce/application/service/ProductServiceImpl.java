@@ -27,6 +27,20 @@ public class ProductServiceImpl implements ProductService {
         this.modelMapper = modelMapper;
     }
 
+    private ProductResponse getProductResponse(List<Product> products) {
+        if(products.isEmpty()){
+            throw new APIException("No product created till now.");
+        }
+
+        List<ProductDTO> productDTOS = products.stream()
+                .map(product -> modelMapper.map(product, ProductDTO.class))
+                .toList();
+
+        ProductResponse productResponse = new ProductResponse();
+        productResponse.setContent(productDTOS);
+        return productResponse;
+    }
+
     @Override
     public ProductDTO addProduct(long categoryId, Product product) {
         Category category = categoryRepository.findById(categoryId)
@@ -41,16 +55,15 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse getAllProducts() {
         List<Product> products = productRepository.findAll();
-
-        if(products.isEmpty()){
-            throw new APIException("No product created till now.");
-        }
-
-        List<ProductDTO> productDTOS = products.stream()
-                .map(product -> modelMapper.map(product, ProductDTO.class))
-                .toList();
-        ProductResponse productResponse = new ProductResponse();
-        productResponse.setContent(productDTOS);
-        return productResponse;
+        return getProductResponse(products);
     }
+
+    @Override
+    public ProductResponse getProductsByCategoryId(long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
+        List<Product> products = productRepository.findByCategoryOrderByPriceAsc(category);
+        return getProductResponse(products);
+    }
+
 }
