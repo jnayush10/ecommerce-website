@@ -1,6 +1,5 @@
 package com.ecommerce.application.controller;
 
-import com.ecommerce.application.model.Product;
 import com.ecommerce.application.payload.ProductDTO;
 import com.ecommerce.application.payload.ProductResponse;
 import com.ecommerce.application.service.ProductService;
@@ -33,14 +32,19 @@ public class ProductController {
     }
 
     @PostMapping("/admin/categories/{categoryId}/product")
-    public ResponseEntity<ProductDTO> addProduct(@RequestBody Product product,
+    public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO productDTO,
                                                  @PathVariable long categoryId){
-        return new ResponseEntity<>(productService.addProduct(categoryId, product), HttpStatus.CREATED);
+        return new ResponseEntity<>(productService.addProduct(categoryId, productDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/admin/products/{productId}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable long productId,
-                                                    @RequestBody Product product){
-        return new ResponseEntity<>(productService.updateProduct(productId, product), HttpStatus.OK);
+                                                    @RequestBody ProductDTO productDTO){
+        return new ResponseEntity<>(productService.updateProduct(productId, productDTO), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/admin/products/{productId}")
+    public ResponseEntity<ProductDTO> deleteProduct(@PathVariable long productId){
+        return new ResponseEntity<>(productService.deleteProduct(productId), HttpStatus.OK);
     }
 }

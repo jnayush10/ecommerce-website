@@ -66,9 +66,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO addProduct(long categoryId, Product product) {
+    public ProductDTO addProduct(long categoryId, ProductDTO productDTO) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
+
+        Product product = modelMapper.map(productDTO, Product.class);
 
         if(productRepository.findByProductName(product.getProductName()) != null){
             throw new APIException("Product with the name " + product.getProductName() + " already exists !!");
@@ -81,9 +83,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO updateProduct(long productId, Product product) {
+    public ProductDTO updateProduct(long productId, ProductDTO productDTO) {
         Product productFromDB = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+
+        Product product = modelMapper.map(productDTO, Product.class);
 
         productFromDB.setProductName(product.getProductName());
         productFromDB.setProductDescription(product.getProductDescription());
@@ -93,5 +97,13 @@ public class ProductServiceImpl implements ProductService {
         productFromDB.setSpecialPrice(calculateSpecialPrice(product.getPrice(), product.getDiscount()));
 
         return modelMapper.map(productRepository.save(productFromDB), ProductDTO.class);
+    }
+
+    @Override
+    public ProductDTO deleteProduct(long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+        productRepository.delete(product);
+        return modelMapper.map(product, ProductDTO.class);
     }
 }
