@@ -27,6 +27,11 @@ public class ProductController {
         return new ResponseEntity<>(productService.getProductsByCategoryId(categoryId), HttpStatus.OK);
     }
 
+    @GetMapping("/public/products/keyword/{keyword}")
+    public ResponseEntity<ProductResponse> getProductsByKeyword(@PathVariable String keyword) {
+        return new ResponseEntity<>(productService.searchProductByKeyword(keyword), HttpStatus.FOUND);
+    }
+
     @PostMapping("/admin/categories/{categoryId}/product")
     public ResponseEntity<ProductDTO> addProduct(@RequestBody Product product,
                                                  @PathVariable long categoryId){
