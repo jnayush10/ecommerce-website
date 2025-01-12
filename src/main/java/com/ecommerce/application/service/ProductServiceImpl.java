@@ -42,17 +42,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO addProduct(long categoryId, Product product) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
-
-        product.setImage("default.png");
-        product.setCategory(category);
-        product.setSpecialPrice(product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice()));
-        return modelMapper.map(productRepository.save(product), ProductDTO.class);
-    }
-
-    @Override
     public ProductResponse getAllProducts() {
         List<Product> products = productRepository.findAll();
         return getProductResponse(products);
@@ -66,4 +55,20 @@ public class ProductServiceImpl implements ProductService {
         return getProductResponse(products);
     }
 
+    @Override
+    public ProductResponse searchProductByKeyword(String keyword) {
+        List<Product> products = productRepository.findByProductNameLikeIgnoreCase('%' + keyword + '%');
+        return getProductResponse(products);
+    }
+
+    @Override
+    public ProductDTO addProduct(long categoryId, Product product) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
+
+        product.setImage("default.png");
+        product.setCategory(category);
+        product.setSpecialPrice(product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice()));
+        return modelMapper.map(productRepository.save(product), ProductDTO.class);
+    }
 }
