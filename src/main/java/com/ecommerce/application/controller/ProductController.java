@@ -3,6 +3,7 @@ package com.ecommerce.application.controller;
 import com.ecommerce.application.payload.ProductDTO;
 import com.ecommerce.application.payload.ProductResponse;
 import com.ecommerce.application.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,14 +36,14 @@ public class ProductController {
     }
 
     @PostMapping("/admin/categories/{categoryId}/product")
-    public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO productDTO,
+    public ResponseEntity<ProductDTO> addProduct(@Valid @RequestBody ProductDTO productDTO,
                                                  @PathVariable long categoryId){
         return new ResponseEntity<>(productService.addProduct(categoryId, productDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/admin/products/{productId}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable long productId,
-                                                    @RequestBody ProductDTO productDTO){
+                                                    @Valid @RequestBody ProductDTO productDTO){
         return new ResponseEntity<>(productService.updateProduct(productId, productDTO), HttpStatus.OK);
     }
 
@@ -53,7 +54,8 @@ public class ProductController {
 
     @PutMapping("/admin/products/{productId}/image")
     public ResponseEntity<ProductDTO> updateProductImage(@PathVariable long productId,
-                                                         @RequestParam("image")MultipartFile image) throws IOException {
+                                                         @RequestParam("image")MultipartFile image)
+            throws IOException {
         return new ResponseEntity<>(productService.updateProductImage(productId, image), HttpStatus.OK);
     }
 }

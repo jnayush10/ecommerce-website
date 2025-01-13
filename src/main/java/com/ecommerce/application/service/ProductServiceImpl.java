@@ -80,17 +80,27 @@ public class ProductServiceImpl implements ProductService {
     public ProductDTO addProduct(long categoryId, ProductDTO productDTO) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
-
         Product product = modelMapper.map(productDTO, Product.class);
+        boolean isProductNotPresent = true;
 
-        if(productRepository.findByProductName(product.getProductName()) != null){
+        List<Product> products = category.getProducts();
+
+        for (Product p : products) {
+            if(p.getProductName().equals(product.getProductName())){
+                isProductNotPresent = false;
+                break;
+            }
+        }
+
+        if(isProductNotPresent){
+            product.setImage("default.png");
+            product.setCategory(category);
+            product.setSpecialPrice(calculateSpecialPrice(product.getPrice(), product.getDiscount()));
+            return modelMapper.map(productRepository.save(product), ProductDTO.class);
+        } else {
             throw new APIException("Product with the name " + product.getProductName() + " already exists !!");
         }
 
-        product.setImage("default.png");
-        product.setCategory(category);
-        product.setSpecialPrice(calculateSpecialPrice(product.getPrice(), product.getDiscount()));
-        return modelMapper.map(productRepository.save(product), ProductDTO.class);
     }
 
     @Override
