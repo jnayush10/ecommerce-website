@@ -26,7 +26,8 @@ public class CategoryController {
             @RequestParam(name="sortOrder", defaultValue=AppConstants.SORT_DIRECTION, required=false) String sortOrder)
             throws Exception
     {
-        return new ResponseEntity<>(categoryService.getAllCategories(pageNumber, pageSize, sortBy, sortOrder), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.getAllCategories(
+                pageNumber, pageSize, sortBy, sortOrder), HttpStatus.OK);
     }
 
     @PostMapping("/admin/categories")
