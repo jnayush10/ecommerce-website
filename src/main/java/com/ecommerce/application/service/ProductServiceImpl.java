@@ -10,6 +10,10 @@ import com.ecommerce.application.repositories.CategoryRepository;
 import com.ecommerce.application.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
         this.fileService = fileService;
     }
 
-    private ProductResponse getProductResponse(List<Product> products) {
+    private ProductResponse getProductResponse(List<Product> products, Page<Product> productPage) {
         if(products.isEmpty()){
             throw new APIException("No product created till now.");
         }
@@ -48,7 +52,14 @@ public class ProductServiceImpl implements ProductService {
                 .toList();
 
         ProductResponse productResponse = new ProductResponse();
+
         productResponse.setContent(productDTOS);
+        productResponse.setPageNumber(productPage.getNumber());
+        productResponse.setPageSize(productPage.getSize());
+        productResponse.setTotalPages(productPage.getTotalPages());
+        productResponse.setTotalElements(productPage.getTotalElements());
+        productResponse.setLastPage(productPage.isLast());
+
         return productResponse;
     }
 
@@ -56,24 +67,45 @@ public class ProductServiceImpl implements ProductService {
         return price - (price * (discount * 0.01));
     }
 
-    @Override
-    public ProductResponse getAllProducts() {
-        List<Product> products = productRepository.findAll();
-        return getProductResponse(products);
+    private Pageable getPageDetails(int pageNumber, int pageSize, String sortBy, String sortOrder){
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        return PageRequest.of(pageNumber, pageSize, sortByAndOrder);
     }
 
     @Override
-    public ProductResponse getProductsByCategoryId(long categoryId) {
+    public ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder) {
+
+        Page<Product> productPage = productRepository.findAll(
+                getPageDetails(pageNumber, pageSize, sortBy, sortOrder));
+
+        List<Product> products = productPage.getContent();
+        return getProductResponse(products, productPage);
+    }
+
+    @Override
+    public ProductResponse getProductsByCategoryId(
+            int pageNumber, int pageSize, String sortBy, String sortOrder, long categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
-        List<Product> products = productRepository.findByCategoryOrderByPriceAsc(category);
-        return getProductResponse(products);
+
+        Page<Product> productPage = productRepository.findByCategoryOrderByPriceAsc(category,
+                getPageDetails(pageNumber, pageSize, sortBy, sortOrder));
+
+        List<Product> products = productPage.getContent();
+        return getProductResponse(products, productPage);
     }
 
     @Override
-    public ProductResponse searchProductByKeyword(String keyword) {
-        List<Product> products = productRepository.findByProductNameLikeIgnoreCase('%' + keyword + '%');
-        return getProductResponse(products);
+    public ProductResponse searchProductByKeyword(
+            int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword) {
+
+        Page<Product> productPage = productRepository.findByProductNameLikeIgnoreCase('%' + keyword + '%',
+                getPageDetails(pageNumber, pageSize, sortBy, sortOrder));
+        List<Product> products = productPage.getContent();
+        return getProductResponse(products, productPage);
     }
 
     @Override
